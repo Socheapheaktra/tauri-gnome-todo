@@ -10,7 +10,10 @@
     "vite:build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:start": "docker/start-db.sh",
+    "db:stop": "docker/stop-db.sh",
+    "db:reset": "docker/reset-db.sh"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

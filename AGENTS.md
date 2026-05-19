@@ -41,3 +41,7 @@ This directory is not currently a Git repository, so no local commit convention 
 ## Security & Configuration Tips
 
 Do not commit real secrets. Store local database settings in `.env`, with `DATABASE_URL` pointing to the Docker PostgreSQL service. Keep Tauri command errors frontend-safe and avoid exposing raw database or filesystem errors to the UI.
+
+## Agent-Specific Instructions
+
+Do not use broad Docker teardown commands such as `docker compose down` or `docker compose down -v` in this repository. Stop or remove only the intended services, for example `docker compose stop postgres adminer` and `docker compose rm -f postgres adminer`, because other local services may be running.
