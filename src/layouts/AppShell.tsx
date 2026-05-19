@@ -18,6 +18,7 @@ import { ProjectDialog } from "@/features/projects/ProjectDialog";
 import { ProjectSidebarList } from "@/features/projects/ProjectSidebarList";
 import type { ProjectSummary } from "@/stores/projectStore";
 import { useProjectStore } from "@/stores/projectStore";
+import { useTaskStore } from "@/stores/taskStore";
 
 const smartViews = [
   { label: "All Tasks", count: 12, icon: Inbox, isActive: true },
@@ -55,13 +56,22 @@ export function AppShell({ children }: PropsWithChildren) {
   const archiveProject = useProjectStore((state) => state.archiveProject);
   const deleteProject = useProjectStore((state) => state.deleteProject);
   const selectProject = useProjectStore((state) => state.selectProject);
+  const tasks = useTaskStore((state) => state.tasks);
   const [projectDialogMode, setProjectDialogMode] = useState<"create" | "edit" | null>(null);
   const [editingProject, setEditingProject] = useState<ProjectSummary | null>(null);
   const [deletingProject, setDeletingProject] = useState<ProjectSummary | null>(null);
 
   const activeProjects = useMemo(
-    () => projects.filter((project) => !project.isArchived),
-    [projects]
+    () =>
+      projects
+        .filter((project) => !project.isArchived)
+        .map((project) => ({
+          ...project,
+          taskCount: tasks.filter(
+            (task) => task.projectId === project.id && task.status !== "completed"
+          ).length
+        })),
+    [projects, tasks]
   );
 
   const closeProjectDialog = () => {
@@ -106,11 +116,16 @@ export function AppShell({ children }: PropsWithChildren) {
                 {smartViews.map((item) => (
                   <button
                     className={`flex h-9 w-full items-center gap-2 rounded-md px-2 text-left text-sm ${
-                      item.isActive
+                      item.isActive && selectedProjectId === null
                         ? "bg-blue-100 text-blue-900"
                         : "text-zinc-700 hover:bg-zinc-200"
                     }`}
                     key={item.label}
+                    onClick={() => {
+                      if (item.label === "All Tasks") {
+                        selectProject(null);
+                      }
+                    }}
                     type="button"
                   >
                     <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
