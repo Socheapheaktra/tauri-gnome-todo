@@ -24,6 +24,7 @@ interface TaskState {
   tasks: Task[];
   selectedTaskId: string | null;
   selectedSmartView: SmartView;
+  searchQuery: string;
   createTask: (draft: CreateTaskDraft) => void;
   updateTask: (id: string, draft: UpdateTaskDraft) => void;
   deleteTask: (id: string) => void;
@@ -31,6 +32,7 @@ interface TaskState {
   reorderTasks: (sourceId: string, targetId: string) => void;
   selectTask: (id: string | null) => void;
   selectSmartView: (view: SmartView) => void;
+  setSearchQuery: (query: string) => void;
 }
 
 const now = new Date().toISOString();
@@ -117,6 +119,7 @@ export const useTaskStore = create<TaskState>((set) => ({
   tasks: initialTasks,
   selectedTaskId: initialTasks[0]?.id ?? null,
   selectedSmartView: "all",
+  searchQuery: "",
   createTask: (draft) =>
     set((state) => {
       const createdAt = new Date().toISOString();
@@ -199,5 +202,6 @@ export const useTaskStore = create<TaskState>((set) => ({
       return { tasks: normalizeTaskOrder(reorderedTasks) };
     }),
   selectTask: (id) => set({ selectedTaskId: id }),
-  selectSmartView: (view) => set({ selectedSmartView: view, selectedTaskId: null })
+  selectSmartView: (view) => set({ selectedSmartView: view, selectedTaskId: null }),
+  setSearchQuery: (query) => set({ searchQuery: query, selectedTaskId: null })
 }));

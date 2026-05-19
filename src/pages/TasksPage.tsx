@@ -5,6 +5,7 @@ import { AddTaskForm } from "@/features/tasks/AddTaskForm";
 import { DeleteTaskDialog } from "@/features/tasks/DeleteTaskDialog";
 import { TaskDetailPanel } from "@/features/tasks/TaskDetailPanel";
 import { TaskList } from "@/features/tasks/TaskList";
+import { searchTasks } from "@/features/tasks/search";
 import {
   filterTasksBySmartView,
   formatSmartDate,
@@ -22,6 +23,7 @@ export function TasksPage() {
   const tasks = useTaskStore((state) => state.tasks);
   const selectedTaskId = useTaskStore((state) => state.selectedTaskId);
   const selectedSmartView = useTaskStore((state) => state.selectedSmartView);
+  const searchQuery = useTaskStore((state) => state.searchQuery);
   const createTask = useTaskStore((state) => state.createTask);
   const updateTask = useTaskStore((state) => state.updateTask);
   const deleteTask = useTaskStore((state) => state.deleteTask);
@@ -35,15 +37,33 @@ export function TasksPage() {
     [projects]
   );
 
-  const visibleTasks = useMemo(() => {
+  const activeTasks = useMemo(() => {
     const activeProjectIds = new Set(activeProjects.map((project) => project.id));
-    const activeTasks = tasks.filter((task) => activeProjectIds.has(task.projectId));
+    return tasks.filter((task) => activeProjectIds.has(task.projectId));
+  }, [activeProjects, tasks]);
+
+  const isSearching = searchQuery.trim().length > 0;
+
+  const visibleTasks = useMemo(() => {
+    if (isSearching) {
+      return searchTasks(activeTasks, activeProjects, searchQuery).sort(
+        (first, second) => first.sortOrder - second.sortOrder
+      );
+    }
+
     const baseTasks = selectedProjectId
       ? activeTasks.filter((task) => task.projectId === selectedProjectId)
       : filterTasksBySmartView(activeTasks, selectedSmartView);
 
     return [...baseTasks].sort((first, second) => first.sortOrder - second.sortOrder);
-  }, [activeProjects, selectedProjectId, selectedSmartView, tasks]);
+  }, [
+    activeProjects,
+    activeTasks,
+    isSearching,
+    searchQuery,
+    selectedProjectId,
+    selectedSmartView
+  ]);
 
   const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null;
   const selectedProject = activeProjects.find((project) => project.id === selectedProjectId);
@@ -54,9 +74,12 @@ export function TasksPage() {
   const completedGroupEntries = Object.entries(completedGroups).sort(([first], [second]) =>
     second.localeCompare(first)
   );
-  const pageTitle = selectedProject?.name ?? smartViewLabels[selectedSmartView];
-  const pageDescription =
-    selectedProject?.description ?? smartViewDescriptions[selectedSmartView];
+  const pageTitle = isSearching
+    ? "Search Results"
+    : selectedProject?.name ?? smartViewLabels[selectedSmartView];
+  const pageDescription = isSearching
+    ? `Matching tasks for "${searchQuery.trim()}".`
+    : selectedProject?.description ?? smartViewDescriptions[selectedSmartView];
 
   return (
     <div className="grid min-h-full grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -64,7 +87,7 @@ export function TasksPage() {
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm font-medium text-blue-700">
-              {selectedProject ? "Project" : "Smart View"}
+              {isSearching ? "Search" : selectedProject ? "Project" : "Smart View"}
             </p>
             <h2 className="mt-1 truncate text-2xl font-semibold tracking-normal text-zinc-950">
               {pageTitle}
@@ -96,7 +119,7 @@ export function TasksPage() {
           </div>
         </div>
 
-        {selectedSmartView !== "completed" || selectedProject ? (
+        {!isSearching && (selectedSmartView !== "completed" || selectedProject) ? (
           <AddTaskForm
             onCreateTask={createTask}
             projects={activeProjects}
@@ -104,7 +127,7 @@ export function TasksPage() {
           />
         ) : null}
 
-        {selectedSmartView === "completed" && !selectedProject ? (
+        {selectedSmartView === "completed" && !selectedProject && !isSearching ? (
           <div className="space-y-5">
             {completedGroupEntries.length === 0 ? (
               <div className="rounded-md border border-dashed border-zinc-300 bg-white px-4 py-10 text-center text-sm text-zinc-500">
@@ -128,6 +151,10 @@ export function TasksPage() {
                 </section>
               ))
             )}
+          </div>
+        ) : visibleTasks.length === 0 && isSearching ? (
+          <div className="rounded-md border border-dashed border-zinc-300 bg-white px-4 py-10 text-center text-sm text-zinc-500">
+            No search results
           </div>
         ) : (
           <TaskList

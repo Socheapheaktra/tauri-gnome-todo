@@ -66,7 +66,9 @@ export function AppShell({ children }: PropsWithChildren) {
   const selectProject = useProjectStore((state) => state.selectProject);
   const tasks = useTaskStore((state) => state.tasks);
   const selectedSmartView = useTaskStore((state) => state.selectedSmartView);
+  const searchQuery = useTaskStore((state) => state.searchQuery);
   const selectSmartView = useTaskStore((state) => state.selectSmartView);
+  const setSearchQuery = useTaskStore((state) => state.setSearchQuery);
   const [projectDialogMode, setProjectDialogMode] = useState<"create" | "edit" | null>(null);
   const [editingProject, setEditingProject] = useState<ProjectSummary | null>(null);
   const [deletingProject, setDeletingProject] = useState<ProjectSummary | null>(null);
@@ -112,10 +114,16 @@ export function AppShell({ children }: PropsWithChildren) {
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-300 bg-zinc-50 px-3">
         <div className="flex min-w-0 items-center gap-3">
           <h1 className="truncate text-sm font-semibold">Tasks</h1>
-          <div className="hidden h-7 items-center gap-2 rounded-md border border-zinc-300 bg-white px-2.5 text-sm text-zinc-500 md:flex">
+          <label className="hidden h-8 min-w-[280px] items-center gap-2 rounded-md border border-zinc-300 bg-white px-2.5 text-sm text-zinc-500 md:flex">
             <Search className="h-4 w-4" aria-hidden="true" />
-            <span>Search tasks</span>
-          </div>
+            <span className="sr-only">Search tasks</span>
+            <input
+              className="h-full min-w-0 flex-1 bg-transparent text-sm text-zinc-900 outline-none placeholder:text-zinc-500"
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search tasks"
+              value={searchQuery}
+            />
+          </label>
         </div>
 
         <div className="flex items-center gap-2">
@@ -134,6 +142,18 @@ export function AppShell({ children }: PropsWithChildren) {
           </HeaderButton>
         </div>
       </header>
+      <div className="border-b border-zinc-300 bg-zinc-50 px-3 py-2 md:hidden">
+        <label className="flex h-9 items-center gap-2 rounded-md border border-zinc-300 bg-white px-2.5 text-sm text-zinc-500">
+          <Search className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only">Search tasks</span>
+          <input
+            className="h-full min-w-0 flex-1 bg-transparent text-sm text-zinc-900 outline-none placeholder:text-zinc-500"
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search tasks"
+            value={searchQuery}
+          />
+        </label>
+      </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(208px,248px)_minmax(0,1fr)]">
         <aside className="min-h-0 overflow-y-auto border-r border-zinc-300 bg-zinc-50 px-3 py-4">
