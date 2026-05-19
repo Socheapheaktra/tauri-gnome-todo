@@ -1,43 +1,144 @@
-import { CalendarDays, CheckCircle2, Inbox, Plus, Settings } from "lucide-react";
+import {
+  CalendarClock,
+  CalendarDays,
+  CheckCircle2,
+  Circle,
+  Clock3,
+  Inbox,
+  PanelRight,
+  Plus,
+  Search,
+  Settings
+} from "lucide-react";
 import type { PropsWithChildren } from "react";
 
-const navigationItems = [
-  { label: "Inbox", icon: Inbox },
-  { label: "Today", icon: CalendarDays },
-  { label: "Completed", icon: CheckCircle2 }
+const smartViews = [
+  { label: "All Tasks", count: 12, icon: Inbox, isActive: true },
+  { label: "Today", count: 4, icon: CalendarDays },
+  { label: "Upcoming", count: 6, icon: CalendarClock },
+  { label: "Overdue", count: 2, icon: Clock3 },
+  { label: "Completed", count: 18, icon: CheckCircle2 }
 ];
+
+const projects = [
+  { label: "Personal", count: 5, color: "#2ec27e" },
+  { label: "Home", count: 3, color: "#e5a50a" },
+  { label: "Desktop App", count: 4, color: "#3584e4" }
+];
+
+function HeaderButton({
+  children,
+  label,
+  isPrimary = false
+}: PropsWithChildren<{ label: string; isPrimary?: boolean }>) {
+  return (
+    <button
+      className={
+        isPrimary
+          ? "inline-flex h-9 items-center gap-2 rounded-md bg-blue-600 px-3 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+          : "inline-flex h-9 w-9 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100"
+      }
+      type="button"
+    >
+      {children}
+      <span className="sr-only">{label}</span>
+    </button>
+  );
+}
 
 export function AppShell({ children }: PropsWithChildren) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="flex h-14 items-center justify-between border-b bg-white px-4">
-        <h1 className="text-sm font-semibold">Tasks</h1>
+    <div className="flex h-screen min-h-[640px] flex-col overflow-hidden bg-zinc-100 text-zinc-950">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-300 bg-zinc-50 px-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <h1 className="truncate text-sm font-semibold">Tasks</h1>
+          <div className="hidden h-7 items-center gap-2 rounded-md border border-zinc-300 bg-white px-2.5 text-sm text-zinc-500 md:flex">
+            <Search className="h-4 w-4" aria-hidden="true" />
+            <span>Search tasks</span>
+          </div>
+        </div>
+
         <div className="flex items-center gap-2">
-          <button className="inline-flex h-9 w-9 items-center justify-center rounded-md border bg-white text-foreground hover:bg-zinc-100">
+          <HeaderButton label="Add task" isPrimary>
             <Plus className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">Add task</span>
-          </button>
-          <button className="inline-flex h-9 w-9 items-center justify-center rounded-md border bg-white text-foreground hover:bg-zinc-100">
+            <span className="hidden sm:inline">Add Task</span>
+          </HeaderButton>
+          <HeaderButton label="Search">
+            <Search className="h-4 w-4" aria-hidden="true" />
+          </HeaderButton>
+          <HeaderButton label="Toggle details">
+            <PanelRight className="h-4 w-4" aria-hidden="true" />
+          </HeaderButton>
+          <HeaderButton label="Settings">
             <Settings className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">Settings</span>
-          </button>
+          </HeaderButton>
         </div>
       </header>
-      <div className="grid flex-1 grid-cols-[240px_1fr]">
-        <aside className="border-r bg-zinc-50 px-3 py-4">
-          <nav className="space-y-1">
-            {navigationItems.map((item) => (
-              <button
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-zinc-200"
-                key={item.label}
-              >
-                <item.icon className="h-4 w-4" aria-hidden="true" />
-                {item.label}
-              </button>
-            ))}
+
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(208px,248px)_minmax(0,1fr)]">
+        <aside className="min-h-0 overflow-y-auto border-r border-zinc-300 bg-zinc-50 px-3 py-4">
+          <nav className="space-y-5" aria-label="Task navigation">
+            <section>
+              <h2 className="px-2 text-xs font-semibold uppercase text-zinc-500">Views</h2>
+              <div className="mt-2 space-y-1">
+                {smartViews.map((item) => (
+                  <button
+                    className={`flex h-9 w-full items-center gap-2 rounded-md px-2 text-left text-sm ${
+                      item.isActive
+                        ? "bg-blue-100 text-blue-900"
+                        : "text-zinc-700 hover:bg-zinc-200"
+                    }`}
+                    key={item.label}
+                    type="button"
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                    <span className="text-xs text-zinc-500">{item.count}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <div className="flex items-center justify-between px-2">
+                <h2 className="text-xs font-semibold uppercase text-zinc-500">Projects</h2>
+                <button
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900"
+                  type="button"
+                >
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  <span className="sr-only">Add project</span>
+                </button>
+              </div>
+              <div className="mt-2 space-y-1">
+                {projects.map((project) => (
+                  <button
+                    className="flex h-9 w-full items-center gap-2 rounded-md px-2 text-left text-sm text-zinc-700 hover:bg-zinc-200"
+                    key={project.label}
+                    type="button"
+                  >
+                    <span
+                      className="h-3 w-3 shrink-0 rounded-full"
+                      style={{ backgroundColor: project.color }}
+                    />
+                    <span className="min-w-0 flex-1 truncate">{project.label}</span>
+                    <span className="text-xs text-zinc-500">{project.count}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-md border border-zinc-300 bg-white p-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-zinc-800">
+                <Circle className="h-4 w-4 text-blue-600" aria-hidden="true" />
+                Focus Queue
+              </div>
+              <p className="mt-1 text-sm text-zinc-600">4 tasks due today</p>
+            </section>
           </nav>
         </aside>
-        <main className="min-w-0 p-6">{children}</main>
+
+        <main className="min-h-0 min-w-0 overflow-y-auto bg-white">{children}</main>
       </div>
     </div>
   );
