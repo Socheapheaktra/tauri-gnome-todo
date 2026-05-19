@@ -17,11 +17,18 @@ This repository is currently a planning scaffold for a GNOME-inspired Tauri TODO
 
 ## Build, Test, and Development Commands
 
-No package manifests are present yet. Once the app is scaffolded, keep commands in `package.json` and prefer these names:
+Node.js, npm, and npx are installed through nvm in this environment. Non-interactive shells may not load nvm automatically, so source it before Node-based commands when needed:
+
+```bash
+source /home/yeeahnis/.nvm/nvm.sh
+```
+
+The project uses `package.json` scripts for common commands:
 
 - `npm run dev`: start the Tauri development app.
 - `npm run build`: build the frontend and Tauri desktop bundle.
 - `npm run lint`: run TypeScript, React, and style linting.
+- `npm run typecheck`: run TypeScript without emitting files.
 - `npm test`: run the frontend test suite.
 - `docker compose up -d`: start PostgreSQL for local development.
 - `npx prisma migrate dev`: apply local database migrations.
@@ -40,7 +47,7 @@ This directory is not currently a Git repository, so no local commit convention 
 
 ## Security & Configuration Tips
 
-Do not commit real secrets. Store local database settings in `.env`, with `DATABASE_URL` pointing to the Docker PostgreSQL service. Keep Tauri command errors frontend-safe and avoid exposing raw database or filesystem errors to the UI.
+Do not commit real secrets. Store local database settings in `.env`, with `DATABASE_URL` pointing to the local PostgreSQL service exposed by Docker Compose. Keep Tauri command errors frontend-safe and avoid exposing raw database or filesystem errors to the UI.
 
 ## Agent-Specific Instructions
 

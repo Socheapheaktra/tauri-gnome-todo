@@ -24,16 +24,16 @@ so unrelated containers are not removed.
 
 Adminer runs at `http://localhost:8080`.
 
-PostgreSQL is not exposed on the host. Services in this Compose project should connect with:
+PostgreSQL runs on `localhost:5432` by default for Prisma and the desktop app:
 
 ```text
-postgresql://todo_user:todo_password@postgres:5432/todo_app
+postgresql://todo_user:todo_password@localhost:5432/todo_app
 ```
 
 Use these credentials unless overridden in `.env`:
 
 - System: `PostgreSQL`
-- Server: `postgres`
+- Server: `localhost`
 - Username: `todo_user`
 - Password: `todo_password`
 - Database: `todo_app`
