@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "GNOME Tauri TODO",
+  "version": "0.1.0",
+  "identifier": "com.example.gnome-tauri-todo",
+  "build": {
+    "beforeDevCommand": "npm run vite:dev",
+    "beforeBuildCommand": "npm run vite:build",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Tasks",
+        "width": 1000,
+        "height": 720,
+        "minWidth": 760,
+        "minHeight": 520
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb"]
+  }
+}
