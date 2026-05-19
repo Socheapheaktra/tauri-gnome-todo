@@ -1,5 +1,6 @@
 import { create } from "zustand";
 
+import type { SmartView } from "@/features/tasks/smartViews";
 import type { Task, TaskPriority, TaskStatus } from "@/features/tasks/taskTypes";
 
 export type CreateTaskDraft = {
@@ -22,12 +23,14 @@ export type UpdateTaskDraft = {
 interface TaskState {
   tasks: Task[];
   selectedTaskId: string | null;
+  selectedSmartView: SmartView;
   createTask: (draft: CreateTaskDraft) => void;
   updateTask: (id: string, draft: UpdateTaskDraft) => void;
   deleteTask: (id: string) => void;
   toggleTaskCompletion: (id: string) => void;
   reorderTasks: (sourceId: string, targetId: string) => void;
   selectTask: (id: string | null) => void;
+  selectSmartView: (view: SmartView) => void;
 }
 
 const now = new Date().toISOString();
@@ -68,6 +71,31 @@ const initialTasks: Task[] = [
     sortOrder: 2,
     createdAt: now,
     updatedAt: now
+  },
+  {
+    id: "task-package-review",
+    projectId: "project-desktop-app",
+    title: "Review phase package boundaries",
+    description: "Make sure completed and upcoming smart views stay readable.",
+    status: "completed",
+    priority: "medium",
+    dueDate: getOffsetDate(-1),
+    completedAt: now,
+    sortOrder: 3,
+    createdAt: now,
+    updatedAt: now
+  },
+  {
+    id: "task-overdue-invoice",
+    projectId: "project-personal",
+    title: "Pay utility invoice",
+    description: "Move this out of the overdue view once completed.",
+    status: "todo",
+    priority: "high",
+    dueDate: getOffsetDate(-2),
+    sortOrder: 4,
+    createdAt: now,
+    updatedAt: now
   }
 ];
 
@@ -88,6 +116,7 @@ function normalizeTaskOrder(tasks: Task[]) {
 export const useTaskStore = create<TaskState>((set) => ({
   tasks: initialTasks,
   selectedTaskId: initialTasks[0]?.id ?? null,
+  selectedSmartView: "all",
   createTask: (draft) =>
     set((state) => {
       const createdAt = new Date().toISOString();
@@ -169,5 +198,6 @@ export const useTaskStore = create<TaskState>((set) => ({
 
       return { tasks: normalizeTaskOrder(reorderedTasks) };
     }),
-  selectTask: (id) => set({ selectedTaskId: id })
+  selectTask: (id) => set({ selectedTaskId: id }),
+  selectSmartView: (view) => set({ selectedSmartView: view, selectedTaskId: null })
 }));

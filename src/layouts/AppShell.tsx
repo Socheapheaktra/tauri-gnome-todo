@@ -16,17 +16,25 @@ import type { PropsWithChildren } from "react";
 import { DeleteProjectDialog } from "@/features/projects/DeleteProjectDialog";
 import { ProjectDialog } from "@/features/projects/ProjectDialog";
 import { ProjectSidebarList } from "@/features/projects/ProjectSidebarList";
+import {
+  filterTasksBySmartView,
+  smartViewLabels,
+  type SmartView
+} from "@/features/tasks/smartViews";
 import type { ProjectSummary } from "@/stores/projectStore";
 import { useProjectStore } from "@/stores/projectStore";
 import { useTaskStore } from "@/stores/taskStore";
 
 const smartViews = [
-  { label: "All Tasks", count: 12, icon: Inbox, isActive: true },
-  { label: "Today", count: 4, icon: CalendarDays },
-  { label: "Upcoming", count: 6, icon: CalendarClock },
-  { label: "Overdue", count: 2, icon: Clock3 },
-  { label: "Completed", count: 18, icon: CheckCircle2 }
-];
+  { id: "all", icon: Inbox },
+  { id: "today", icon: CalendarDays },
+  { id: "upcoming", icon: CalendarClock },
+  { id: "overdue", icon: Clock3 },
+  { id: "completed", icon: CheckCircle2 }
+] satisfies Array<{
+  id: SmartView;
+  icon: typeof Inbox;
+}>;
 
 function HeaderButton({
   children,
@@ -57,6 +65,8 @@ export function AppShell({ children }: PropsWithChildren) {
   const deleteProject = useProjectStore((state) => state.deleteProject);
   const selectProject = useProjectStore((state) => state.selectProject);
   const tasks = useTaskStore((state) => state.tasks);
+  const selectedSmartView = useTaskStore((state) => state.selectedSmartView);
+  const selectSmartView = useTaskStore((state) => state.selectSmartView);
   const [projectDialogMode, setProjectDialogMode] = useState<"create" | "edit" | null>(null);
   const [editingProject, setEditingProject] = useState<ProjectSummary | null>(null);
   const [deletingProject, setDeletingProject] = useState<ProjectSummary | null>(null);
@@ -78,6 +88,24 @@ export function AppShell({ children }: PropsWithChildren) {
     setProjectDialogMode(null);
     setEditingProject(null);
   };
+
+  const smartViewCounts = useMemo(
+    () =>
+      smartViews.reduce<Record<SmartView, number>>(
+        (counts, view) => ({
+          ...counts,
+          [view.id]: filterTasksBySmartView(tasks, view.id).length
+        }),
+        {
+          all: 0,
+          today: 0,
+          upcoming: 0,
+          overdue: 0,
+          completed: 0
+        }
+      ),
+    [tasks]
+  );
 
   return (
     <div className="flex h-screen min-h-[640px] flex-col overflow-hidden bg-zinc-100 text-zinc-950">
@@ -116,21 +144,20 @@ export function AppShell({ children }: PropsWithChildren) {
                 {smartViews.map((item) => (
                   <button
                     className={`flex h-9 w-full items-center gap-2 rounded-md px-2 text-left text-sm ${
-                      item.isActive && selectedProjectId === null
+                      selectedSmartView === item.id && selectedProjectId === null
                         ? "bg-blue-100 text-blue-900"
                         : "text-zinc-700 hover:bg-zinc-200"
                     }`}
-                    key={item.label}
+                    key={item.id}
                     onClick={() => {
-                      if (item.label === "All Tasks") {
-                        selectProject(null);
-                      }
+                      selectProject(null);
+                      selectSmartView(item.id);
                     }}
                     type="button"
                   >
                     <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                    <span className="text-xs text-zinc-500">{item.count}</span>
+                    <span className="min-w-0 flex-1 truncate">{smartViewLabels[item.id]}</span>
+                    <span className="text-xs text-zinc-500">{smartViewCounts[item.id]}</span>
                   </button>
                 ))}
               </div>
@@ -168,7 +195,9 @@ export function AppShell({ children }: PropsWithChildren) {
                 <Circle className="h-4 w-4 text-blue-600" aria-hidden="true" />
                 Focus Queue
               </div>
-              <p className="mt-1 text-sm text-zinc-600">4 tasks due today</p>
+              <p className="mt-1 text-sm text-zinc-600">
+                {smartViewCounts.today} tasks due today
+              </p>
             </section>
           </nav>
         </aside>

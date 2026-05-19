@@ -5,6 +5,13 @@ import { AddTaskForm } from "@/features/tasks/AddTaskForm";
 import { DeleteTaskDialog } from "@/features/tasks/DeleteTaskDialog";
 import { TaskDetailPanel } from "@/features/tasks/TaskDetailPanel";
 import { TaskList } from "@/features/tasks/TaskList";
+import {
+  filterTasksBySmartView,
+  formatSmartDate,
+  groupCompletedTasksByDate,
+  smartViewDescriptions,
+  smartViewLabels
+} from "@/features/tasks/smartViews";
 import type { Task } from "@/features/tasks/taskTypes";
 import { useProjectStore } from "@/stores/projectStore";
 import { useTaskStore } from "@/stores/taskStore";
@@ -14,6 +21,7 @@ export function TasksPage() {
   const selectedProjectId = useProjectStore((state) => state.selectedProjectId);
   const tasks = useTaskStore((state) => state.tasks);
   const selectedTaskId = useTaskStore((state) => state.selectedTaskId);
+  const selectedSmartView = useTaskStore((state) => state.selectedSmartView);
   const createTask = useTaskStore((state) => state.createTask);
   const updateTask = useTaskStore((state) => state.updateTask);
   const deleteTask = useTaskStore((state) => state.deleteTask);
@@ -28,18 +36,27 @@ export function TasksPage() {
   );
 
   const visibleTasks = useMemo(() => {
+    const activeProjectIds = new Set(activeProjects.map((project) => project.id));
+    const activeTasks = tasks.filter((task) => activeProjectIds.has(task.projectId));
     const baseTasks = selectedProjectId
-      ? tasks.filter((task) => task.projectId === selectedProjectId)
-      : tasks;
+      ? activeTasks.filter((task) => task.projectId === selectedProjectId)
+      : filterTasksBySmartView(activeTasks, selectedSmartView);
 
     return [...baseTasks].sort((first, second) => first.sortOrder - second.sortOrder);
-  }, [selectedProjectId, tasks]);
+  }, [activeProjects, selectedProjectId, selectedSmartView, tasks]);
 
   const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null;
   const selectedProject = activeProjects.find((project) => project.id === selectedProjectId);
   const openTaskCount = visibleTasks.filter((task) => task.status !== "completed").length;
   const completedTaskCount = visibleTasks.filter((task) => task.status === "completed").length;
   const dueTodayCount = visibleTasks.filter((task) => task.dueDate === getToday()).length;
+  const completedGroups = groupCompletedTasksByDate(visibleTasks);
+  const completedGroupEntries = Object.entries(completedGroups).sort(([first], [second]) =>
+    second.localeCompare(first)
+  );
+  const pageTitle = selectedProject?.name ?? smartViewLabels[selectedSmartView];
+  const pageDescription =
+    selectedProject?.description ?? smartViewDescriptions[selectedSmartView];
 
   return (
     <div className="grid min-h-full grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -50,12 +67,9 @@ export function TasksPage() {
               {selectedProject ? "Project" : "Smart View"}
             </p>
             <h2 className="mt-1 truncate text-2xl font-semibold tracking-normal text-zinc-950">
-              {selectedProject?.name ?? "All Tasks"}
+              {pageTitle}
             </h2>
-            <p className="mt-1 text-sm text-zinc-600">
-              {selectedProject?.description ??
-                "Active tasks across projects, ordered by project position."}
-            </p>
+            <p className="mt-1 text-sm text-zinc-600">{pageDescription}</p>
           </div>
           <button
             className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
@@ -82,21 +96,50 @@ export function TasksPage() {
           </div>
         </div>
 
-        <AddTaskForm
-          onCreateTask={createTask}
-          projects={activeProjects}
-          selectedProjectId={selectedProjectId}
-        />
+        {selectedSmartView !== "completed" || selectedProject ? (
+          <AddTaskForm
+            onCreateTask={createTask}
+            projects={activeProjects}
+            selectedProjectId={selectedProjectId}
+          />
+        ) : null}
 
-        <TaskList
-          onDeleteTask={setTaskPendingDelete}
-          onReorderTask={reorderTasks}
-          onSelectTask={selectTask}
-          onToggleTask={toggleTaskCompletion}
-          projects={projects}
-          selectedTaskId={selectedTaskId}
-          tasks={visibleTasks}
-        />
+        {selectedSmartView === "completed" && !selectedProject ? (
+          <div className="space-y-5">
+            {completedGroupEntries.length === 0 ? (
+              <div className="rounded-md border border-dashed border-zinc-300 bg-white px-4 py-10 text-center text-sm text-zinc-500">
+                No completed tasks yet
+              </div>
+            ) : (
+              completedGroupEntries.map(([date, groupTasks]) => (
+                <section key={date}>
+                  <h3 className="mb-2 text-sm font-semibold text-zinc-700">
+                    {formatSmartDate(date)}
+                  </h3>
+                  <TaskList
+                    onDeleteTask={setTaskPendingDelete}
+                    onReorderTask={reorderTasks}
+                    onSelectTask={selectTask}
+                    onToggleTask={toggleTaskCompletion}
+                    projects={projects}
+                    selectedTaskId={selectedTaskId}
+                    tasks={groupTasks}
+                  />
+                </section>
+              ))
+            )}
+          </div>
+        ) : (
+          <TaskList
+            onDeleteTask={setTaskPendingDelete}
+            onReorderTask={reorderTasks}
+            onSelectTask={selectTask}
+            onToggleTask={toggleTaskCompletion}
+            projects={projects}
+            selectedTaskId={selectedTaskId}
+            tasks={visibleTasks}
+          />
+        )}
       </section>
 
       <TaskDetailPanel
