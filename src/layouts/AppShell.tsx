@@ -10,7 +10,14 @@ import {
   Search,
   Settings
 } from "lucide-react";
+import { useMemo, useState } from "react";
 import type { PropsWithChildren } from "react";
+
+import { DeleteProjectDialog } from "@/features/projects/DeleteProjectDialog";
+import { ProjectDialog } from "@/features/projects/ProjectDialog";
+import { ProjectSidebarList } from "@/features/projects/ProjectSidebarList";
+import type { ProjectSummary } from "@/stores/projectStore";
+import { useProjectStore } from "@/stores/projectStore";
 
 const smartViews = [
   { label: "All Tasks", count: 12, icon: Inbox, isActive: true },
@@ -18,12 +25,6 @@ const smartViews = [
   { label: "Upcoming", count: 6, icon: CalendarClock },
   { label: "Overdue", count: 2, icon: Clock3 },
   { label: "Completed", count: 18, icon: CheckCircle2 }
-];
-
-const projects = [
-  { label: "Personal", count: 5, color: "#2ec27e" },
-  { label: "Home", count: 3, color: "#e5a50a" },
-  { label: "Desktop App", count: 4, color: "#3584e4" }
 ];
 
 function HeaderButton({
@@ -47,6 +48,27 @@ function HeaderButton({
 }
 
 export function AppShell({ children }: PropsWithChildren) {
+  const projects = useProjectStore((state) => state.projects);
+  const selectedProjectId = useProjectStore((state) => state.selectedProjectId);
+  const createProject = useProjectStore((state) => state.createProject);
+  const updateProject = useProjectStore((state) => state.updateProject);
+  const archiveProject = useProjectStore((state) => state.archiveProject);
+  const deleteProject = useProjectStore((state) => state.deleteProject);
+  const selectProject = useProjectStore((state) => state.selectProject);
+  const [projectDialogMode, setProjectDialogMode] = useState<"create" | "edit" | null>(null);
+  const [editingProject, setEditingProject] = useState<ProjectSummary | null>(null);
+  const [deletingProject, setDeletingProject] = useState<ProjectSummary | null>(null);
+
+  const activeProjects = useMemo(
+    () => projects.filter((project) => !project.isArchived),
+    [projects]
+  );
+
+  const closeProjectDialog = () => {
+    setProjectDialogMode(null);
+    setEditingProject(null);
+  };
+
   return (
     <div className="flex h-screen min-h-[640px] flex-col overflow-hidden bg-zinc-100 text-zinc-950">
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-300 bg-zinc-50 px-3">
@@ -104,6 +126,7 @@ export function AppShell({ children }: PropsWithChildren) {
                 <h2 className="text-xs font-semibold uppercase text-zinc-500">Projects</h2>
                 <button
                   className="inline-flex h-6 w-6 items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900"
+                  onClick={() => setProjectDialogMode("create")}
                   type="button"
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />
@@ -111,20 +134,17 @@ export function AppShell({ children }: PropsWithChildren) {
                 </button>
               </div>
               <div className="mt-2 space-y-1">
-                {projects.map((project) => (
-                  <button
-                    className="flex h-9 w-full items-center gap-2 rounded-md px-2 text-left text-sm text-zinc-700 hover:bg-zinc-200"
-                    key={project.label}
-                    type="button"
-                  >
-                    <span
-                      className="h-3 w-3 shrink-0 rounded-full"
-                      style={{ backgroundColor: project.color }}
-                    />
-                    <span className="min-w-0 flex-1 truncate">{project.label}</span>
-                    <span className="text-xs text-zinc-500">{project.count}</span>
-                  </button>
-                ))}
+                <ProjectSidebarList
+                  projects={activeProjects}
+                  selectedProjectId={selectedProjectId}
+                  onArchiveProject={(project) => archiveProject(project.id)}
+                  onDeleteProject={setDeletingProject}
+                  onEditProject={(project) => {
+                    setEditingProject(project);
+                    setProjectDialogMode("edit");
+                  }}
+                  onSelectProject={selectProject}
+                />
               </div>
             </section>
 
@@ -140,6 +160,32 @@ export function AppShell({ children }: PropsWithChildren) {
 
         <main className="min-h-0 min-w-0 overflow-y-auto bg-white">{children}</main>
       </div>
+
+      <ProjectDialog
+        mode={projectDialogMode ?? "create"}
+        onClose={closeProjectDialog}
+        onSubmit={(draft) => {
+          if (projectDialogMode === "edit" && editingProject) {
+            updateProject(editingProject.id, draft);
+          } else {
+            createProject(draft);
+          }
+
+          closeProjectDialog();
+        }}
+        open={projectDialogMode !== null}
+        project={editingProject}
+      />
+      <DeleteProjectDialog
+        onClose={() => setDeletingProject(null)}
+        onConfirm={() => {
+          if (deletingProject) {
+            deleteProject(deletingProject.id);
+            setDeletingProject(null);
+          }
+        }}
+        project={deletingProject}
+      />
     </div>
   );
 }
