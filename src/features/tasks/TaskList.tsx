@@ -42,11 +42,11 @@ export function TaskList({
   }
 
   return (
-    <div className="divide-y divide-zinc-200 rounded-md border border-zinc-200 bg-white shadow-sm">
+    <div className="divide-y divide-zinc-200 rounded-md border border-zinc-200 bg-white shadow-sm dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
       {tasks.map((task) => (
         <article
-          className={`grid grid-cols-[auto_auto_minmax(0,1fr)_auto] gap-3 px-4 py-3 hover:bg-zinc-50 ${
-            selectedTaskId === task.id ? "bg-blue-50" : ""
+          className={`grid grid-cols-[auto_auto_minmax(0,1fr)_auto] gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/70 ${
+            selectedTaskId === task.id ? "bg-blue-50 dark:bg-blue-950/40" : ""
           }`}
           draggable
           key={task.id}
@@ -65,7 +65,7 @@ export function TaskList({
           }}
         >
           <button
-            className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+            className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
             type="button"
           >
             <GripVertical className="h-4 w-4" aria-hidden="true" />
@@ -97,8 +97,8 @@ export function TaskList({
               <h3
                 className={`truncate text-sm font-medium ${
                   task.status === "completed"
-                    ? "text-zinc-500 line-through"
-                    : "text-zinc-950"
+                    ? "text-zinc-500 line-through dark:text-zinc-500"
+                    : "text-zinc-950 dark:text-zinc-100"
                 }`}
               >
                 {task.title}
@@ -109,15 +109,17 @@ export function TaskList({
                 </span>
               ) : null}
               {task.status === "completed" ? (
-                <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
+                <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
                   Completed
                 </span>
               ) : null}
             </div>
             {task.description ? (
-              <p className="mt-1 truncate text-sm text-zinc-600">{task.description}</p>
+              <p className="mt-1 truncate text-sm text-zinc-600 dark:text-zinc-400">
+                {task.description}
+              </p>
             ) : null}
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
               {task.dueDate ? (
                 <span className="inline-flex items-center gap-1">
                   <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
@@ -134,7 +136,7 @@ export function TaskList({
 
           <div className="flex">
             <button
-              className="h-8 w-8 rounded-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+              className="h-8 w-8 rounded-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
               onClick={(event) => {
                 event.stopPropagation();
                 onSelectTask(task.id);
@@ -145,7 +147,7 @@ export function TaskList({
               <span className="sr-only">Task actions</span>
             </button>
             <button
-              className="h-8 w-8 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-700"
+              className="h-8 w-8 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-700 dark:text-zinc-400 dark:hover:bg-red-950/40 dark:hover:text-red-300"
               onClick={(event) => {
                 event.stopPropagation();
                 onDeleteTask(task);

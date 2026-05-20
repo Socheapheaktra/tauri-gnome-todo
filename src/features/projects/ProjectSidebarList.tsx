@@ -38,8 +38,8 @@ export function ProjectSidebarList({
           <button
             className={`flex h-9 w-full items-center gap-2 rounded-md px-2 pr-9 text-left text-sm ${
               selectedProjectId === project.id
-                ? "bg-blue-100 text-blue-900"
-                : "text-zinc-700 hover:bg-zinc-200"
+                ? "bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-100"
+                : "text-zinc-700 hover:bg-zinc-200 dark:text-zinc-300 dark:hover:bg-zinc-800"
             }`}
             onClick={() => onSelectProject(project.id)}
             type="button"
@@ -49,7 +49,7 @@ export function ProjectSidebarList({
               style={{ backgroundColor: project.color }}
             />
             <span className="min-w-0 flex-1 truncate">{project.name}</span>
-            <span className="text-xs text-zinc-500">{project.taskCount}</span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">{project.taskCount}</span>
           </button>
 
           <div className="absolute right-1 top-1 flex opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
@@ -80,7 +80,7 @@ function ProjectActionButton({
 }) {
   return (
     <button
-      className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-zinc-50 text-zinc-500 hover:bg-white hover:text-zinc-950"
+      className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-zinc-50 text-zinc-500 hover:bg-white hover:text-zinc-950 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
       onClick={(event) => {
         event.stopPropagation();
         onClick();

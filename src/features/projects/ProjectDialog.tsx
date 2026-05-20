@@ -68,10 +68,10 @@ export function ProjectDialog({
 
         <div className="space-y-4 px-4 py-4">
           <label className="block">
-            <span className="text-sm font-medium text-zinc-700">Name</span>
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Name</span>
             <input
               autoFocus
-              className="mt-1 h-9 w-full rounded-md border border-zinc-300 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
               onChange={(event) => setName(event.target.value)}
               placeholder="Project name"
               value={name}
@@ -79,9 +79,11 @@ export function ProjectDialog({
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium text-zinc-700">Description</span>
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Description
+            </span>
             <textarea
-              className="mt-1 min-h-20 w-full resize-none rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="mt-1 min-h-20 w-full resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
               onChange={(event) => setDescription(event.target.value)}
               placeholder="Optional project notes"
               value={description}
@@ -89,7 +91,7 @@ export function ProjectDialog({
           </label>
 
           <fieldset>
-            <legend className="text-sm font-medium text-zinc-700">Color</legend>
+            <legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Color</legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {projectColors.map((projectColor) => (
                 <button
@@ -109,7 +111,7 @@ export function ProjectDialog({
 
         <DialogFooter>
           <button
-            className="h-9 rounded-md border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+            className="h-9 rounded-md border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
             onClick={onClose}
             type="button"
           >

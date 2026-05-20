@@ -95,16 +95,16 @@ export function TasksPage() {
       <section className="min-w-0 px-4 py-5 sm:px-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-blue-700">
+            <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
               {isSearching ? "Search" : selectedProject ? "Project" : "Smart View"}
             </p>
-            <h2 className="mt-1 truncate text-2xl font-semibold tracking-normal text-zinc-950">
+            <h2 className="mt-1 truncate text-2xl font-semibold tracking-normal text-zinc-950 dark:text-zinc-100">
               {pageTitle}
             </h2>
-            <p className="mt-1 text-sm text-zinc-600">{pageDescription}</p>
+            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{pageDescription}</p>
           </div>
           <button
-            className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-800 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
             onClick={() => window.dispatchEvent(new CustomEvent("todo:new-task"))}
             type="button"
           >
@@ -114,16 +114,16 @@ export function TasksPage() {
         </div>
 
         <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <p className="text-xs text-zinc-500">Open</p>
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Open</p>
             <p className="mt-1 text-lg font-semibold">{openTaskCount}</p>
           </div>
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <p className="text-xs text-zinc-500">Due Today</p>
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Due Today</p>
             <p className="mt-1 text-lg font-semibold">{dueTodayCount}</p>
           </div>
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <p className="text-xs text-zinc-500">Completed</p>
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Completed</p>
             <p className="mt-1 text-lg font-semibold">{completedTaskCount}</p>
           </div>
         </div>
@@ -159,7 +159,7 @@ export function TasksPage() {
             ) : (
               completedGroupEntries.map(([date, groupTasks]) => (
                 <section key={date}>
-                  <h3 className="mb-2 text-sm font-semibold text-zinc-700">
+                  <h3 className="mb-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                     {formatSmartDate(date)}
                   </h3>
                   <TaskList

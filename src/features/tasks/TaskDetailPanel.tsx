@@ -35,9 +35,9 @@ export function TaskDetailPanel({
 
   if (!task) {
     return (
-      <aside className="hidden min-h-full border-l border-zinc-200 bg-zinc-50 px-5 py-6 xl:block">
-        <p className="text-sm font-medium text-zinc-500">Task Details</p>
-        <div className="mt-4 rounded-md border border-dashed border-zinc-300 bg-white p-4 text-sm text-zinc-500">
+      <aside className="hidden min-h-full border-l border-zinc-200 bg-zinc-50 px-5 py-6 dark:border-zinc-800 dark:bg-zinc-900 xl:block">
+        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Task Details</p>
+        <div className="mt-4 rounded-md border border-dashed border-zinc-300 bg-white p-4 text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400">
           Select a task to edit its details.
         </div>
       </aside>
@@ -47,10 +47,12 @@ export function TaskDetailPanel({
   const canSave = title.trim().length > 0 && projectId.length > 0;
 
   return (
-    <aside className="hidden min-h-full border-l border-zinc-200 bg-zinc-50 px-5 py-6 xl:block">
+    <aside className="hidden min-h-full border-l border-zinc-200 bg-zinc-50 px-5 py-6 dark:border-zinc-800 dark:bg-zinc-900 xl:block">
       <div className="mb-5">
-        <p className="text-sm font-medium text-zinc-500">Task Details</p>
-        <h2 className="mt-1 line-clamp-2 text-lg font-semibold text-zinc-950">{task.title}</h2>
+        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Task Details</p>
+        <h2 className="mt-1 line-clamp-2 text-lg font-semibold text-zinc-950 dark:text-zinc-100">
+          {task.title}
+        </h2>
       </div>
 
       <form
@@ -72,27 +74,27 @@ export function TaskDetailPanel({
         }}
       >
         <label className="block">
-          <span className="text-sm font-medium text-zinc-700">Title</span>
+          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Title</span>
           <input
-            className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
             onChange={(event) => setTitle(event.target.value)}
             value={title}
           />
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-zinc-700">Description</span>
+          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Description</span>
           <textarea
-            className="mt-1 min-h-24 w-full resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="mt-1 min-h-24 w-full resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
             onChange={(event) => setDescription(event.target.value)}
             value={description}
           />
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-zinc-700">Project</span>
+          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Project</span>
           <select
-            className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
             onChange={(event) => setProjectId(event.target.value)}
             value={projectId}
           >
@@ -107,9 +109,9 @@ export function TaskDetailPanel({
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-zinc-700">Due Date</span>
+          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Due Date</span>
           <input
-            className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
             onChange={(event) => setDueDate(event.target.value)}
             type="date"
             value={dueDate}
@@ -118,9 +120,9 @@ export function TaskDetailPanel({
 
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <span className="text-sm font-medium text-zinc-700">Priority</span>
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Priority</span>
             <select
-              className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
               onChange={(event) => setPriority(event.target.value as TaskPriority)}
               value={priority}
             >
@@ -131,9 +133,9 @@ export function TaskDetailPanel({
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium text-zinc-700">Status</span>
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Status</span>
             <select
-              className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
               onChange={(event) => setStatus(event.target.value as TaskStatus)}
               value={status}
             >
