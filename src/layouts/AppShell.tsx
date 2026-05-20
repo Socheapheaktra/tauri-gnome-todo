@@ -64,12 +64,16 @@ function HeaderButton({
 export function AppShell({ children }: PropsWithChildren) {
   const projects = useProjectStore((state) => state.projects);
   const selectedProjectId = useProjectStore((state) => state.selectedProjectId);
+  const projectsLoading = useProjectStore((state) => state.isLoading);
+  const hydrateProjects = useProjectStore((state) => state.hydrateProjects);
   const createProject = useProjectStore((state) => state.createProject);
   const updateProject = useProjectStore((state) => state.updateProject);
   const archiveProject = useProjectStore((state) => state.archiveProject);
   const deleteProject = useProjectStore((state) => state.deleteProject);
   const selectProject = useProjectStore((state) => state.selectProject);
   const tasks = useTaskStore((state) => state.tasks);
+  const tasksLoading = useTaskStore((state) => state.isLoading);
+  const hydrateTasks = useTaskStore((state) => state.hydrateTasks);
   const selectedSmartView = useTaskStore((state) => state.selectedSmartView);
   const searchQuery = useTaskStore((state) => state.searchQuery);
   const selectSmartView = useTaskStore((state) => state.selectSmartView);
@@ -81,12 +85,15 @@ export function AppShell({ children }: PropsWithChildren) {
   const setTheme = useSettingsStore((state) => state.setTheme);
   const setStartupView = useSettingsStore((state) => state.setStartupView);
   const setLastOpenedProjectId = useSettingsStore((state) => state.setLastOpenedProjectId);
+  const settingsLoading = useSettingsStore((state) => state.isLoading);
+  const hydrateSettings = useSettingsStore((state) => state.hydrateSettings);
   const [projectDialogMode, setProjectDialogMode] = useState<"create" | "edit" | null>(null);
   const [editingProject, setEditingProject] = useState<ProjectSummary | null>(null);
   const [deletingProject, setDeletingProject] = useState<ProjectSummary | null>(null);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const desktopSearchRef = useRef<HTMLInputElement>(null);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
+  const dataHydratedRef = useRef(false);
   const startupAppliedRef = useRef(false);
 
   const activeProjects = useMemo(
@@ -106,6 +113,17 @@ export function AppShell({ children }: PropsWithChildren) {
     setProjectDialogMode(null);
     setEditingProject(null);
   };
+
+  useEffect(() => {
+    if (dataHydratedRef.current) {
+      return;
+    }
+
+    dataHydratedRef.current = true;
+    void hydrateSettings();
+    void hydrateProjects();
+    void hydrateTasks();
+  }, [hydrateProjects, hydrateSettings, hydrateTasks]);
 
   const openProjectDialog = () => setProjectDialogMode("create");
   const focusSearch = () => {
@@ -145,6 +163,10 @@ export function AppShell({ children }: PropsWithChildren) {
       return;
     }
 
+    if (projectsLoading || settingsLoading || tasksLoading) {
+      return;
+    }
+
     startupAppliedRef.current = true;
 
     if (startupView === "today") {
@@ -167,9 +189,12 @@ export function AppShell({ children }: PropsWithChildren) {
   }, [
     activeProjects,
     lastOpenedProjectId,
+    projectsLoading,
     selectProject,
     selectSmartView,
-    startupView
+    settingsLoading,
+    startupView,
+    tasksLoading
   ]);
 
   useEffect(() => {

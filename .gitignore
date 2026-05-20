@@ -10,3 +10,5 @@ src-tauri/gen/
 *.log
 AGENTS.md
 gnome_tauri_todo_app_agentic_task_list.md
+/pkg
+*.zst

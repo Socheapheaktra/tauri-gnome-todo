@@ -1,4 +1,5 @@
 mod commands;
+mod db;
 mod error;
 mod models;
 
@@ -6,11 +7,13 @@ use commands::projects::{
     archive_project, create_project, delete_project, get_project_by_id, list_projects,
     update_project,
 };
-use commands::settings::{get_app_setting, update_app_setting, SettingsState};
+use commands::settings::{get_app_setting, update_app_setting};
 use commands::tasks::{
-    complete_task, create_task, delete_task, list_overdue_tasks, list_tasks_by_project,
-    list_today_tasks, reopen_task, reorder_tasks, update_task,
+    complete_task, create_task, delete_task, list_all_tasks, list_overdue_tasks,
+    list_tasks_by_project, list_today_tasks, reopen_task, reorder_tasks, update_task,
 };
+use db::DbState;
+use tauri::Manager;
 
 #[tauri::command]
 fn app_health() -> &'static str {
@@ -20,7 +23,11 @@ fn app_health() -> &'static str {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .manage(SettingsState::default())
+        .setup(|app| {
+            let db = DbState::connect(app.handle())?;
+            app.manage(db);
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             app_health,
             create_project,
@@ -34,6 +41,7 @@ pub fn run() {
             delete_task,
             complete_task,
             reopen_task,
+            list_all_tasks,
             list_tasks_by_project,
             list_today_tasks,
             list_overdue_tasks,

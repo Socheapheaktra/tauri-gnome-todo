@@ -1,4 +1,5 @@
 use serde::Serialize;
+use std::fmt;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -16,12 +17,13 @@ impl CommandError {
     }
 }
 
-pub fn command_not_configured() -> CommandError {
-    CommandError {
-        code: "database_unavailable",
-        message: "Database-backed Tauri commands are not connected yet".to_string(),
+impl fmt::Display for CommandError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "{}: {}", self.code, self.message)
     }
 }
+
+impl std::error::Error for CommandError {}
 
 pub trait CommandResultExt<T> {
     fn map_command_error(self, message: &'static str) -> Result<T, CommandError>;

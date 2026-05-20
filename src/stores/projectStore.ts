@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import type { Project } from "@/features/projects/projectTypes";
+import * as api from "@/lib/tauriApi";
 
 export type ProjectSummary = Project & {
   taskCount: number;
@@ -15,101 +16,92 @@ export type ProjectDraft = {
 interface ProjectState {
   projects: ProjectSummary[];
   selectedProjectId: string | null;
-  createProject: (draft: ProjectDraft) => void;
-  updateProject: (id: string, draft: ProjectDraft) => void;
-  archiveProject: (id: string) => void;
-  deleteProject: (id: string) => void;
+  isLoading: boolean;
+  error: string | null;
+  hydrateProjects: () => Promise<void>;
+  createProject: (draft: ProjectDraft) => Promise<void>;
+  updateProject: (id: string, draft: ProjectDraft) => Promise<void>;
+  archiveProject: (id: string) => Promise<void>;
+  deleteProject: (id: string) => Promise<void>;
   selectProject: (id: string | null) => void;
 }
 
-const now = new Date().toISOString();
-
-const initialProjects: ProjectSummary[] = [
-  {
-    id: "project-personal",
-    name: "Personal",
-    description: "Personal errands and reminders.",
-    color: "#2ec27e",
-    isArchived: false,
-    taskCount: 5,
-    createdAt: now,
-    updatedAt: now
-  },
-  {
-    id: "project-home",
-    name: "Home",
-    description: "Household maintenance and planning.",
-    color: "#e5a50a",
-    isArchived: false,
-    taskCount: 3,
-    createdAt: now,
-    updatedAt: now
-  },
-  {
-    id: "project-desktop-app",
-    name: "Desktop App",
-    description: "GNOME-inspired Tauri TODO app work.",
-    color: "#3584e4",
-    isArchived: false,
-    taskCount: 4,
-    createdAt: now,
-    updatedAt: now
-  }
-];
-
-function createProjectId() {
-  return `project-${crypto.randomUUID()}`;
+function toProjectSummary(project: Project): ProjectSummary {
+  return { ...project, taskCount: 0 };
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
-  projects: initialProjects,
+  projects: [],
   selectedProjectId: null,
-  createProject: (draft) =>
-    set((state) => {
-      const createdAt = new Date().toISOString();
-      const project: ProjectSummary = {
-        id: createProjectId(),
-        name: draft.name.trim(),
-        description: draft.description?.trim() || undefined,
-        color: draft.color,
-        isArchived: false,
-        taskCount: 0,
-        createdAt,
-        updatedAt: createdAt
-      };
-
-      return {
+  isLoading: true,
+  error: null,
+  hydrateProjects: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const projects = await api.listProjects(true);
+      set({ projects: projects.map(toProjectSummary), isLoading: false });
+    } catch (error) {
+      set({ error: getErrorMessage(error), isLoading: false });
+    }
+  },
+  createProject: async (draft) => {
+    try {
+      const project = toProjectSummary(await api.createProject(draft));
+      set((state) => ({
         projects: [...state.projects, project],
-        selectedProjectId: project.id
-      };
-    }),
-  updateProject: (id, draft) =>
-    set((state) => ({
-      projects: state.projects.map((project) =>
-        project.id === id
-          ? {
-              ...project,
-              name: draft.name.trim(),
-              description: draft.description?.trim() || undefined,
-              color: draft.color,
-              updatedAt: new Date().toISOString()
-            }
-          : project
-      )
-    })),
-  archiveProject: (id) =>
-    set((state) => ({
-      projects: state.projects.map((project) =>
-        project.id === id
-          ? { ...project, isArchived: true, updatedAt: new Date().toISOString() }
-          : project
-      ),
-      selectedProjectId: state.selectedProjectId === id ? null : state.selectedProjectId
-    })),
-  deleteProject: (id) =>
-    set((state) => ({
-      projects: state.projects.filter((project) => project.id !== id),
-      selectedProjectId: state.selectedProjectId === id ? null : state.selectedProjectId
-    })),
+        selectedProjectId: project.id,
+        error: null
+      }));
+    } catch (error) {
+      set({ error: getErrorMessage(error) });
+    }
+  },
+  updateProject: async (id, draft) => {
+    try {
+      const updatedProject = toProjectSummary(await api.updateProject(id, draft));
+      set((state) => ({
+        projects: state.projects.map((project) =>
+          project.id === id ? { ...updatedProject, taskCount: project.taskCount } : project
+        ),
+        error: null
+      }));
+    } catch (error) {
+      set({ error: getErrorMessage(error) });
+    }
+  },
+  archiveProject: async (id) => {
+    try {
+      const archivedProject = toProjectSummary(await api.archiveProject(id));
+      set((state) => ({
+        projects: state.projects.map((project) =>
+          project.id === id ? { ...archivedProject, taskCount: project.taskCount } : project
+        ),
+        selectedProjectId: state.selectedProjectId === id ? null : state.selectedProjectId,
+        error: null
+      }));
+    } catch (error) {
+      set({ error: getErrorMessage(error) });
+    }
+  },
+  deleteProject: async (id) => {
+    try {
+      await api.deleteProject(id);
+      set((state) => ({
+        projects: state.projects.filter((project) => project.id !== id),
+        selectedProjectId: state.selectedProjectId === id ? null : state.selectedProjectId,
+        error: null
+      }));
+    } catch (error) {
+      set({ error: getErrorMessage(error) });
+    }
+  },
   selectProject: (id) => set({ selectedProjectId: id })
 }));
+
+function getErrorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "message" in error) {
+    return String(error.message);
+  }
+
+  return "Unable to update projects";
+}

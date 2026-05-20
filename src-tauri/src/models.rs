@@ -40,12 +40,48 @@ pub enum TaskStatusDto {
     Completed,
 }
 
+impl TaskStatusDto {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Todo => "todo",
+            Self::InProgress => "in_progress",
+            Self::Completed => "completed",
+        }
+    }
+
+    pub fn from_db(value: String) -> Self {
+        match value.as_str() {
+            "in_progress" => Self::InProgress,
+            "completed" => Self::Completed,
+            _ => Self::Todo,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "snake_case")]
 pub enum TaskPriorityDto {
     Low,
     Medium,
     High,
+}
+
+impl TaskPriorityDto {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Low => "low",
+            Self::Medium => "medium",
+            Self::High => "high",
+        }
+    }
+
+    pub fn from_db(value: String) -> Self {
+        match value.as_str() {
+            "low" => Self::Low,
+            "high" => Self::High,
+            _ => Self::Medium,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

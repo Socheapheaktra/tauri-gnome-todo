@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+import * as api from "@/lib/tauriApi";
+
 export type ThemePreference = "system" | "light" | "dark";
 export type StartupViewPreference = "all" | "today" | "lastProject";
 
@@ -10,9 +12,12 @@ type PersistedSettings = {
 };
 
 interface SettingsState extends PersistedSettings {
-  setTheme: (theme: ThemePreference) => void;
-  setStartupView: (startupView: StartupViewPreference) => void;
-  setLastOpenedProjectId: (projectId: string | null) => void;
+  isLoading: boolean;
+  error: string | null;
+  hydrateSettings: () => Promise<void>;
+  setTheme: (theme: ThemePreference) => Promise<void>;
+  setStartupView: (startupView: StartupViewPreference) => Promise<void>;
+  setLastOpenedProjectId: (projectId: string | null) => Promise<void>;
 }
 
 const storageKey = "gnome-todo-settings";
@@ -22,28 +27,6 @@ const defaultSettings: PersistedSettings = {
   startupView: "all",
   lastOpenedProjectId: null
 };
-
-function readSettings(): PersistedSettings {
-  if (typeof window === "undefined") {
-    return defaultSettings;
-  }
-
-  const rawSettings = window.localStorage.getItem(storageKey);
-
-  if (!rawSettings) {
-    return defaultSettings;
-  }
-
-  try {
-    return { ...defaultSettings, ...JSON.parse(rawSettings) };
-  } catch {
-    return defaultSettings;
-  }
-}
-
-function persistSettings(settings: PersistedSettings) {
-  window.localStorage.setItem(storageKey, JSON.stringify(settings));
-}
 
 function updateSettings(
   state: SettingsState,
@@ -61,15 +44,58 @@ function updateSettings(
         : state.lastOpenedProjectId
   };
 
-  persistSettings(settings);
   return settings;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
-  ...readSettings(),
-  setTheme: (theme) => set((state) => updateSettings(state, { theme })),
-  setStartupView: (startupView) =>
-    set((state) => updateSettings(state, { startupView })),
-  setLastOpenedProjectId: (lastOpenedProjectId) =>
-    set((state) => updateSettings(state, { lastOpenedProjectId }))
+  ...defaultSettings,
+  isLoading: true,
+  error: null,
+  hydrateSettings: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const setting = await api.getAppSetting<PersistedSettings>(storageKey);
+      set({ ...(setting?.value ?? defaultSettings), isLoading: false });
+    } catch (error) {
+      set({ error: getErrorMessage(error), isLoading: false });
+    }
+  },
+  setTheme: async (theme) => {
+    const settings = updateSettings(useSettingsStore.getState(), { theme });
+    set({ ...settings, error: null });
+    await persistSettings(settings, set);
+  },
+  setStartupView: async (startupView) => {
+    const settings = updateSettings(useSettingsStore.getState(), { startupView });
+    set({ ...settings, error: null });
+    await persistSettings(settings, set);
+  },
+  setLastOpenedProjectId: async (lastOpenedProjectId) => {
+    const settings = updateSettings(useSettingsStore.getState(), { lastOpenedProjectId });
+    set({ ...settings, error: null });
+    await persistSettings(settings, set);
+  }
 }));
+
+async function persistSettings(
+  settings: PersistedSettings,
+  set: (
+    partial:
+      | Partial<SettingsState>
+      | ((state: SettingsState) => Partial<SettingsState>)
+  ) => void
+) {
+  try {
+    await api.updateAppSetting(storageKey, settings);
+  } catch (error) {
+    set({ error: getErrorMessage(error) });
+  }
+}
+
+function getErrorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "message" in error) {
+    return String(error.message);
+  }
+
+  return "Unable to update settings";
+}
