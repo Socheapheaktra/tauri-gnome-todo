@@ -13,7 +13,6 @@ sha256sums=()
 build() {
   cd "$startdir"
 
-  source ~/.nvm/nvm.sh
   npm run vite:build
   cd src-tauri
   cargo build --release --features tauri/custom-protocol
