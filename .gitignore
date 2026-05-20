@@ -8,3 +8,5 @@ src-tauri/gen/
 .env
 .env.local
 *.log
+AGENTS.md
+gnome_tauri_todo_app_agentic_task_list.md
