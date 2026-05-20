@@ -56,6 +56,21 @@ The app creates and migrates a SQLite database automatically on startup. The
 database file is named `tasks.sqlite3` and is stored in the platform app data
 directory for the Tauri identifier `dev.yeeahnis.gnome-tauri-todo`.
 
+Debug/dev Tauri runs use an isolated database:
+
+```text
+.dev-data/tasks.sqlite3
+```
+
+Release builds and installed packages use the production local database:
+
+```text
+~/.local/share/dev.yeeahnis.gnome-tauri-todo/tasks.sqlite3
+```
+
+For release builds, if `XDG_DATA_HOME` is set, replace `~/.local/share` with
+that directory.
+
 No PostgreSQL, Docker Compose service, `.env` database URL, Prisma generation,
 or manual migration command is required.
 

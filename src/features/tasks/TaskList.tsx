@@ -1,4 +1,4 @@
-import { CalendarDays, Check, Flag, GripVertical, MoreHorizontal, Trash2 } from "lucide-react";
+import { CalendarDays, Check, Flag, GripVertical, Trash2 } from "lucide-react";
 
 import { EmptyState } from "@/components/EmptyState";
 import type { ProjectSummary } from "@/stores/projectStore";
@@ -45,7 +45,7 @@ export function TaskList({
     <div className="divide-y divide-zinc-200 rounded-md border border-zinc-200 bg-white shadow-sm dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
       {tasks.map((task) => (
         <article
-          className={`grid grid-cols-[auto_auto_minmax(0,1fr)_auto] gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/70 ${
+          className={`grid cursor-pointer grid-cols-[auto_auto_minmax(0,1fr)_auto] gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/70 ${
             selectedTaskId === task.id ? "bg-blue-50 dark:bg-blue-950/40" : ""
           }`}
           draggable
@@ -135,17 +135,6 @@ export function TaskList({
           </div>
 
           <div className="flex">
-            <button
-              className="h-8 w-8 rounded-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-              onClick={(event) => {
-                event.stopPropagation();
-                onSelectTask(task.id);
-              }}
-              type="button"
-            >
-              <MoreHorizontal className="mx-auto h-4 w-4" aria-hidden="true" />
-              <span className="sr-only">Task actions</span>
-            </button>
             <button
               className="h-8 w-8 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-700 dark:text-zinc-400 dark:hover:bg-red-950/40 dark:hover:text-red-300"
               onClick={(event) => {

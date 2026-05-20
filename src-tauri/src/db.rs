@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use rusqlite::Connection;
@@ -17,10 +18,12 @@ impl DbState {
             .app_data_dir()
             .map_command_error("Unable to locate app data directory")?;
 
-        fs::create_dir_all(&app_data_dir)
-            .map_command_error("Unable to create app data directory")?;
+        let db_path = database_path(&app_data_dir);
 
-        let db_path = app_data_dir.join("tasks.sqlite3");
+        if let Some(db_dir) = db_path.parent() {
+            fs::create_dir_all(db_dir).map_command_error("Unable to create app data directory")?;
+        }
+
         let conn = Connection::open(db_path).map_command_error("Unable to open SQLite database")?;
 
         conn.pragma_update(None, "foreign_keys", "ON")
@@ -34,6 +37,19 @@ impl DbState {
             conn: Mutex::new(conn),
         })
     }
+}
+
+#[cfg(debug_assertions)]
+fn database_path(_app_data_dir: &Path) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join(".dev-data")
+        .join("tasks.sqlite3")
+}
+
+#[cfg(not(debug_assertions))]
+fn database_path(app_data_dir: &Path) -> PathBuf {
+    app_data_dir.join("tasks.sqlite3")
 }
 
 fn run_migrations(conn: &Connection) -> Result<(), CommandError> {

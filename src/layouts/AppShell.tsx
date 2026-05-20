@@ -5,7 +5,6 @@ import {
   Circle,
   Clock3,
   Inbox,
-  PanelRight,
   Plus,
   Search,
   Settings
@@ -283,9 +282,6 @@ export function AppShell({ children }: PropsWithChildren) {
           </HeaderButton>
           <HeaderButton label="Search" onClick={focusSearch}>
             <Search className="h-4 w-4" aria-hidden="true" />
-          </HeaderButton>
-          <HeaderButton label="Close details" onClick={() => selectTask(null)}>
-            <PanelRight className="h-4 w-4" aria-hidden="true" />
           </HeaderButton>
           <HeaderButton label="Settings" onClick={() => setPreferencesOpen(true)}>
             <Settings className="h-4 w-4" aria-hidden="true" />

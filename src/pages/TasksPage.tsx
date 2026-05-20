@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteTaskDialog } from "@/features/tasks/DeleteTaskDialog";
-import { TaskDetailPanel } from "@/features/tasks/TaskDetailPanel";
+import { TaskFormView } from "@/features/tasks/TaskDetailPanel";
 import { TaskFormDialog } from "@/features/tasks/TaskFormDialog";
 import { TaskList } from "@/features/tasks/TaskList";
 import { searchTasks } from "@/features/tasks/search";
@@ -91,8 +91,17 @@ export function TasksPage() {
     : selectedProject?.description ?? smartViewDescriptions[selectedSmartView];
 
   return (
-    <div className="grid min-h-full grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <section className="min-w-0 px-4 py-5 sm:px-6">
+    <div className="min-h-full">
+      {selectedTask ? (
+        <TaskFormView
+          onBack={() => selectTask(null)}
+          onDeleteTask={setTaskPendingDelete}
+          onUpdateTask={updateTask}
+          projects={activeProjects}
+          task={selectedTask}
+        />
+      ) : (
+        <section className="min-w-0 px-4 py-5 sm:px-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
@@ -202,14 +211,8 @@ export function TasksPage() {
             tasks={visibleTasks}
           />
         )}
-      </section>
-
-      <TaskDetailPanel
-        onDeleteTask={setTaskPendingDelete}
-        onUpdateTask={updateTask}
-        projects={activeProjects}
-        task={selectedTask}
-      />
+        </section>
+      )}
 
       <DeleteTaskDialog
         onClose={() => setTaskPendingDelete(null)}

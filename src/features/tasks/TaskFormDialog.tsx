@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
+import { DatePicker } from "@/components/ui/date-picker";
 import type { ProjectSummary } from "@/stores/projectStore";
 import type { CreateTaskDraft } from "@/stores/taskStore";
 import type { TaskPriority } from "./taskTypes";
@@ -41,7 +42,7 @@ export function TaskFormDialog({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [projectId, setProjectId] = useState(defaultProjectId);
-  const [dueDate, setDueDate] = useState("");
+  const [dueDate, setDueDate] = useState(getTodayDate());
   const [priority, setPriority] = useState<TaskPriority>("medium");
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export function TaskFormDialog({
     setTitle("");
     setDescription("");
     setProjectId(defaultProjectId);
-    setDueDate("");
+    setDueDate(getTodayDate());
     setPriority("medium");
   }, [defaultProjectId, open]);
 
@@ -61,7 +62,7 @@ export function TaskFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
-      <DialogContent className="max-w-4xl overflow-hidden">
+      <DialogContent className="max-w-4xl overflow-visible">
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -144,12 +145,9 @@ export function TaskFormDialog({
                       <CalendarDays className="h-4 w-4 text-zinc-500" aria-hidden="true" />
                       Due Date
                     </span>
-                    <input
-                      className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:ring-blue-950"
-                      onChange={(event) => setDueDate(event.target.value)}
-                      type="date"
-                      value={dueDate}
-                    />
+                    <div className="mt-1">
+                      <DatePicker value={dueDate} onChange={setDueDate} placeholder="Due Date"/>
+                    </div>
                   </label>
 
                   <label className="block">
@@ -207,4 +205,8 @@ export function TaskFormDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+function getTodayDate() {
+  return new Date().toISOString().slice(0, 10);
 }

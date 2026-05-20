@@ -54,7 +54,7 @@ export const useTaskStore = create<TaskState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const tasks = await api.listTasks();
-      set({ tasks, selectedTaskId: tasks[0]?.id ?? null, isLoading: false });
+      set({ tasks, selectedTaskId: null, isLoading: false });
     } catch (error) {
       set({ error: getErrorMessage(error), isLoading: false });
     }
@@ -64,7 +64,7 @@ export const useTaskStore = create<TaskState>((set) => ({
       const task = await api.createTask(draft);
       set((state) => ({
         tasks: [...state.tasks, task],
-        selectedTaskId: task.id,
+        selectedTaskId: null,
         error: null
       }));
     } catch (error) {
@@ -90,8 +90,7 @@ export const useTaskStore = create<TaskState>((set) => ({
 
         return {
           tasks: remainingTasks,
-          selectedTaskId:
-            state.selectedTaskId === id ? remainingTasks[0]?.id ?? null : state.selectedTaskId,
+          selectedTaskId: state.selectedTaskId === id ? null : state.selectedTaskId,
           error: null
         };
       });
