@@ -1,9 +1,10 @@
-import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { CheckCircle2, FolderPlus, Plus, SearchX } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-import { AddTaskForm } from "@/features/tasks/AddTaskForm";
+import { EmptyState } from "@/components/EmptyState";
 import { DeleteTaskDialog } from "@/features/tasks/DeleteTaskDialog";
 import { TaskDetailPanel } from "@/features/tasks/TaskDetailPanel";
+import { TaskFormDialog } from "@/features/tasks/TaskFormDialog";
 import { TaskList } from "@/features/tasks/TaskList";
 import { searchTasks } from "@/features/tasks/search";
 import {
@@ -31,6 +32,14 @@ export function TasksPage() {
   const reorderTasks = useTaskStore((state) => state.reorderTasks);
   const selectTask = useTaskStore((state) => state.selectTask);
   const [taskPendingDelete, setTaskPendingDelete] = useState<Task | null>(null);
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const openTaskDialog = () => setTaskDialogOpen(true);
+
+    window.addEventListener("todo:new-task", openTaskDialog);
+    return () => window.removeEventListener("todo:new-task", openTaskDialog);
+  }, []);
 
   const activeProjects = useMemo(
     () => projects.filter((project) => !project.isArchived),
@@ -82,8 +91,8 @@ export function TasksPage() {
     : selectedProject?.description ?? smartViewDescriptions[selectedSmartView];
 
   return (
-    <div className="grid min-h-full grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <section className="min-w-0 px-6 py-6">
+    <div className="grid min-h-full grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <section className="min-w-0 px-4 py-5 sm:px-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm font-medium text-blue-700">
@@ -96,7 +105,7 @@ export function TasksPage() {
           </div>
           <button
             className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
-            onClick={() => selectTask(null)}
+            onClick={() => window.dispatchEvent(new CustomEvent("todo:new-task"))}
             type="button"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
@@ -104,7 +113,7 @@ export function TasksPage() {
           </button>
         </div>
 
-        <div className="mb-4 grid grid-cols-3 gap-3">
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
             <p className="text-xs text-zinc-500">Open</p>
             <p className="mt-1 text-lg font-semibold">{openTaskCount}</p>
@@ -119,20 +128,34 @@ export function TasksPage() {
           </div>
         </div>
 
-        {!isSearching && (selectedSmartView !== "completed" || selectedProject) ? (
-          <AddTaskForm
-            onCreateTask={createTask}
-            projects={activeProjects}
-            selectedProjectId={selectedProjectId}
+        {activeProjects.length === 0 ? (
+          <EmptyState
+            icon={FolderPlus}
+            title="Create your first project"
+            description="Projects keep related tasks together and give new tasks a default home."
+            action={
+              <button
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-700"
+                onClick={() => window.dispatchEvent(new CustomEvent("todo:new-project"))}
+                type="button"
+              >
+                <FolderPlus className="h-4 w-4" aria-hidden="true" />
+                New Project
+              </button>
+            }
           />
         ) : null}
 
-        {selectedSmartView === "completed" && !selectedProject && !isSearching ? (
+        {activeProjects.length === 0 ? null : selectedSmartView === "completed" &&
+          !selectedProject &&
+          !isSearching ? (
           <div className="space-y-5">
             {completedGroupEntries.length === 0 ? (
-              <div className="rounded-md border border-dashed border-zinc-300 bg-white px-4 py-10 text-center text-sm text-zinc-500">
-                No completed tasks yet
-              </div>
+              <EmptyState
+                icon={CheckCircle2}
+                title="No completed tasks yet"
+                description="Completed tasks will be grouped here by completion date."
+              />
             ) : (
               completedGroupEntries.map(([date, groupTasks]) => (
                 <section key={date}>
@@ -153,9 +176,21 @@ export function TasksPage() {
             )}
           </div>
         ) : visibleTasks.length === 0 && isSearching ? (
-          <div className="rounded-md border border-dashed border-zinc-300 bg-white px-4 py-10 text-center text-sm text-zinc-500">
-            No search results
-          </div>
+          <EmptyState
+            icon={SearchX}
+            title="No search results"
+            description="Try a different task title, description, or project name."
+          />
+        ) : visibleTasks.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle2}
+            title={selectedSmartView === "all" ? "All caught up" : "Nothing here"}
+            description={
+              selectedSmartView === "all"
+                ? "Every active task is complete. Add a task when there is something new to track."
+                : "Tasks will appear here when they match this view."
+            }
+          />
         ) : (
           <TaskList
             onDeleteTask={setTaskPendingDelete}
@@ -185,6 +220,14 @@ export function TasksPage() {
           }
         }}
         task={taskPendingDelete}
+      />
+
+      <TaskFormDialog
+        onClose={() => setTaskDialogOpen(false)}
+        onCreateTask={createTask}
+        open={taskDialogOpen}
+        projects={activeProjects}
+        selectedProjectId={selectedProjectId}
       />
     </div>
   );

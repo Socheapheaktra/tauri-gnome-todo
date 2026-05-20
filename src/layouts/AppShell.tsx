@@ -10,7 +10,7 @@ import {
   Search,
   Settings
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PropsWithChildren } from "react";
 
 import { DeleteProjectDialog } from "@/features/projects/DeleteProjectDialog";
@@ -39,8 +39,9 @@ const smartViews = [
 function HeaderButton({
   children,
   label,
-  isPrimary = false
-}: PropsWithChildren<{ label: string; isPrimary?: boolean }>) {
+  isPrimary = false,
+  onClick
+}: PropsWithChildren<{ label: string; isPrimary?: boolean; onClick?: () => void }>) {
   return (
     <button
       className={
@@ -48,6 +49,8 @@ function HeaderButton({
           ? "inline-flex h-9 items-center gap-2 rounded-md bg-blue-600 px-3 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
           : "inline-flex h-9 w-9 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100"
       }
+      onClick={onClick}
+      title={label}
       type="button"
     >
       {children}
@@ -69,9 +72,12 @@ export function AppShell({ children }: PropsWithChildren) {
   const searchQuery = useTaskStore((state) => state.searchQuery);
   const selectSmartView = useTaskStore((state) => state.selectSmartView);
   const setSearchQuery = useTaskStore((state) => state.setSearchQuery);
+  const selectTask = useTaskStore((state) => state.selectTask);
   const [projectDialogMode, setProjectDialogMode] = useState<"create" | "edit" | null>(null);
   const [editingProject, setEditingProject] = useState<ProjectSummary | null>(null);
   const [deletingProject, setDeletingProject] = useState<ProjectSummary | null>(null);
+  const desktopSearchRef = useRef<HTMLInputElement>(null);
+  const mobileSearchRef = useRef<HTMLInputElement>(null);
 
   const activeProjects = useMemo(
     () =>
@@ -90,6 +96,62 @@ export function AppShell({ children }: PropsWithChildren) {
     setProjectDialogMode(null);
     setEditingProject(null);
   };
+
+  const openProjectDialog = () => setProjectDialogMode("create");
+  const focusSearch = () => {
+    const searchInput =
+      window.matchMedia("(min-width: 768px)").matches
+        ? desktopSearchRef.current
+        : mobileSearchRef.current;
+
+    searchInput?.focus();
+    searchInput?.select();
+  };
+  const focusNewTask = () => {
+    window.dispatchEvent(new CustomEvent("todo:new-task"));
+  };
+
+  useEffect(() => {
+    const openProject = () => openProjectDialog();
+
+    window.addEventListener("todo:new-project", openProject);
+    return () => window.removeEventListener("todo:new-project", openProject);
+  }, []);
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        selectTask(null);
+        desktopSearchRef.current?.blur();
+        mobileSearchRef.current?.blur();
+        return;
+      }
+
+      if (!event.ctrlKey || event.altKey || event.metaKey) {
+        return;
+      }
+
+      if (event.key.toLowerCase() === "f") {
+        event.preventDefault();
+        focusSearch();
+        return;
+      }
+
+      if (event.key.toLowerCase() === "n" && event.shiftKey) {
+        event.preventDefault();
+        openProjectDialog();
+        return;
+      }
+
+      if (event.key.toLowerCase() === "n" && !event.shiftKey) {
+        event.preventDefault();
+        focusNewTask();
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, [selectTask]);
 
   const smartViewCounts = useMemo(
     () =>
@@ -110,8 +172,8 @@ export function AppShell({ children }: PropsWithChildren) {
   );
 
   return (
-    <div className="flex h-screen min-h-[640px] flex-col overflow-hidden bg-zinc-100 text-zinc-950">
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-300 bg-zinc-50 px-3">
+    <div className="flex h-screen min-h-[560px] flex-col overflow-hidden bg-zinc-100 text-zinc-950">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-300 bg-zinc-50/95 px-3 shadow-sm">
         <div className="flex min-w-0 items-center gap-3">
           <h1 className="truncate text-sm font-semibold">Tasks</h1>
           <label className="hidden h-8 min-w-[280px] items-center gap-2 rounded-md border border-zinc-300 bg-white px-2.5 text-sm text-zinc-500 md:flex">
@@ -121,20 +183,21 @@ export function AppShell({ children }: PropsWithChildren) {
               className="h-full min-w-0 flex-1 bg-transparent text-sm text-zinc-900 outline-none placeholder:text-zinc-500"
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search tasks"
+              ref={desktopSearchRef}
               value={searchQuery}
             />
           </label>
         </div>
 
         <div className="flex items-center gap-2">
-          <HeaderButton label="Add task" isPrimary>
+          <HeaderButton label="Add task" isPrimary onClick={focusNewTask}>
             <Plus className="h-4 w-4" aria-hidden="true" />
             <span className="hidden sm:inline">Add Task</span>
           </HeaderButton>
-          <HeaderButton label="Search">
+          <HeaderButton label="Search" onClick={focusSearch}>
             <Search className="h-4 w-4" aria-hidden="true" />
           </HeaderButton>
-          <HeaderButton label="Toggle details">
+          <HeaderButton label="Close details" onClick={() => selectTask(null)}>
             <PanelRight className="h-4 w-4" aria-hidden="true" />
           </HeaderButton>
           <HeaderButton label="Settings">
@@ -150,13 +213,14 @@ export function AppShell({ children }: PropsWithChildren) {
             className="h-full min-w-0 flex-1 bg-transparent text-sm text-zinc-900 outline-none placeholder:text-zinc-500"
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search tasks"
+            ref={mobileSearchRef}
             value={searchQuery}
           />
         </label>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(208px,248px)_minmax(0,1fr)]">
-        <aside className="min-h-0 overflow-y-auto border-r border-zinc-300 bg-zinc-50 px-3 py-4">
+      <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[minmax(208px,248px)_minmax(0,1fr)]">
+        <aside className="max-h-52 overflow-y-auto border-b border-zinc-300 bg-zinc-50 px-3 py-3 md:max-h-none md:min-h-0 md:border-b-0 md:border-r md:py-4">
           <nav className="space-y-5" aria-label="Task navigation">
             <section>
               <h2 className="px-2 text-xs font-semibold uppercase text-zinc-500">Views</h2>
@@ -188,7 +252,7 @@ export function AppShell({ children }: PropsWithChildren) {
                 <h2 className="text-xs font-semibold uppercase text-zinc-500">Projects</h2>
                 <button
                   className="inline-flex h-6 w-6 items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900"
-                  onClick={() => setProjectDialogMode("create")}
+                  onClick={openProjectDialog}
                   type="button"
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />

@@ -1,6 +1,7 @@
 import { Archive, Pencil, Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { EmptyState } from "@/components/EmptyState";
 import type { ProjectSummary } from "@/stores/projectStore";
 
 type ProjectSidebarListProps = {
@@ -22,9 +23,11 @@ export function ProjectSidebarList({
 }: ProjectSidebarListProps) {
   if (projects.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-zinc-300 px-3 py-4 text-sm text-zinc-500">
-        No active projects
-      </div>
+      <EmptyState
+        icon={Pencil}
+        title="No projects"
+        description="Create a project to group related tasks."
+      />
     );
   }
 

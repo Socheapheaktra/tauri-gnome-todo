@@ -1,5 +1,6 @@
 import { CalendarDays, Check, Flag, GripVertical, MoreHorizontal, Trash2 } from "lucide-react";
 
+import { EmptyState } from "@/components/EmptyState";
 import type { ProjectSummary } from "@/stores/projectStore";
 import type { Task } from "@/features/tasks/taskTypes";
 
@@ -32,14 +33,16 @@ export function TaskList({
 
   if (tasks.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-zinc-300 bg-white px-4 py-10 text-center text-sm text-zinc-500">
-        No tasks in this view
-      </div>
+      <EmptyState
+        icon={Check}
+        title="No tasks"
+        description="This view is clear. New tasks will appear here when they match the current view."
+      />
     );
   }
 
   return (
-    <div className="divide-y divide-zinc-200 rounded-md border border-zinc-200 bg-white">
+    <div className="divide-y divide-zinc-200 rounded-md border border-zinc-200 bg-white shadow-sm">
       {tasks.map((task) => (
         <article
           className={`grid grid-cols-[auto_auto_minmax(0,1fr)_auto] gap-3 px-4 py-3 hover:bg-zinc-50 ${

@@ -35,7 +35,7 @@ export function TaskDetailPanel({
 
   if (!task) {
     return (
-      <aside className="hidden min-h-full border-l border-zinc-200 bg-zinc-50 px-5 py-6 lg:block">
+      <aside className="hidden min-h-full border-l border-zinc-200 bg-zinc-50 px-5 py-6 xl:block">
         <p className="text-sm font-medium text-zinc-500">Task Details</p>
         <div className="mt-4 rounded-md border border-dashed border-zinc-300 bg-white p-4 text-sm text-zinc-500">
           Select a task to edit its details.
@@ -47,7 +47,7 @@ export function TaskDetailPanel({
   const canSave = title.trim().length > 0 && projectId.length > 0;
 
   return (
-    <aside className="hidden min-h-full border-l border-zinc-200 bg-zinc-50 px-5 py-6 lg:block">
+    <aside className="hidden min-h-full border-l border-zinc-200 bg-zinc-50 px-5 py-6 xl:block">
       <div className="mb-5">
         <p className="text-sm font-medium text-zinc-500">Task Details</p>
         <h2 className="mt-1 line-clamp-2 text-lg font-semibold text-zinc-950">{task.title}</h2>
