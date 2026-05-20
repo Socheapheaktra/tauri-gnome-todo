@@ -1,5 +1,5 @@
 pkgname=yeeahnis-todo
-pkgver=0.1.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc="GNOME-inspired desktop task manager"
 arch=('x86_64')
