@@ -9,6 +9,14 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { TaskDescription } from "@/features/tasks/TaskDescription";
 import type { ProjectSummary } from "@/stores/projectStore";
 import type { CreateTaskDraft } from "@/stores/taskStore";
 import type { TaskPriority } from "./taskTypes";
@@ -62,7 +70,7 @@ export function TaskFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
-      <DialogContent className="max-w-4xl overflow-visible">
+      <DialogContent className="max-w-5xl overflow-visible">
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -97,17 +105,32 @@ export function TaskFormDialog({
                 />
               </label>
 
-              <label className="block">
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Description
-                </span>
-                <textarea
-                  className="mt-1 min-h-44 w-full resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
-                  onChange={(event) => setDescription(event.target.value)}
-                  placeholder="Add context, acceptance notes, or reminders."
-                  value={description}
-                />
-              </label>
+              <div className="grid gap-4 lg:grid-cols-2">
+                <label className="block">
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Description
+                  </span>
+                  <textarea
+                    className="mt-1 min-h-44 w-full resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
+                    onChange={(event) => setDescription(event.target.value)}
+                    placeholder="Add context, acceptance notes, or reminders."
+                    value={description}
+                  />
+                </label>
+
+                <div>
+                  <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Preview</p>
+                  <div className="mt-1 min-h-44 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-950">
+                    {description.trim() ? (
+                      <TaskDescription markdown={description} />
+                    ) : (
+                      <p className="text-sm text-zinc-500 dark:text-zinc-500">
+                        No description yet.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
             <aside className="border-t border-zinc-200 bg-zinc-50 px-4 py-4 dark:border-zinc-800 dark:bg-zinc-950 md:border-l md:border-t-0">
@@ -127,17 +150,20 @@ export function TaskFormDialog({
                       <FolderKanban className="h-4 w-4 text-zinc-500" aria-hidden="true" />
                       Project
                     </span>
-                    <select
-                      className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:ring-blue-950"
-                      onChange={(event) => setProjectId(event.target.value)}
-                      value={projectId}
-                    >
-                      {activeProjects.map((project) => (
-                        <option key={project.id} value={project.id}>
-                          {project.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="mt-1">
+                      <Select onValueChange={setProjectId} value={projectId}>
+                        <SelectTrigger className="dark:bg-zinc-900">
+                          <SelectValue placeholder="Select project" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {activeProjects.map((project) => (
+                            <SelectItem key={project.id} value={project.id}>
+                              {project.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </label>
 
                   <label className="block">
@@ -155,17 +181,23 @@ export function TaskFormDialog({
                       <Flag className="h-4 w-4 text-zinc-500" aria-hidden="true" />
                       Priority
                     </span>
-                    <select
-                      className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:ring-blue-950"
-                      onChange={(event) => setPriority(event.target.value as TaskPriority)}
-                      value={priority}
-                    >
-                      {priorityOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="mt-1">
+                      <Select
+                        onValueChange={(value) => setPriority(value as TaskPriority)}
+                        value={priority}
+                      >
+                        <SelectTrigger className="dark:bg-zinc-900">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {priorityOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </label>
 
                   <div className="rounded-md border border-zinc-200 bg-white p-3 text-sm dark:border-zinc-800 dark:bg-zinc-900">
@@ -175,6 +207,9 @@ export function TaskFormDialog({
                     <p className="mt-2 text-zinc-600 dark:text-zinc-400">
                       {title.trim() || "Untitled task"}
                     </p>
+                    {description.trim() ? (
+                      <TaskDescription className="mt-2" markdown={description} variant="compact" />
+                    ) : null}
                     <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
                       {selectedProject?.name ?? "No project"} · {priority} priority
                     </p>

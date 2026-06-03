@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+
+- Added markdown rendering for task descriptions in task detail, Add Task preview, and task list rows.
+- Preserved markdown line breaks and bullet lists in task list description previews.
+- Replaced native project and priority dropdowns with shadcn-style Select controls.
+- Replaced the task status dropdown with an Odoo-inspired statusbar control.
+
 ## 1.0.1
 
 - Reworked task details from a right-side panel into a full main-content form view opened by clicking a task.

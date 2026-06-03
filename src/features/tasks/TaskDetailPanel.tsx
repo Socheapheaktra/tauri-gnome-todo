@@ -2,6 +2,15 @@ import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { TaskDescription } from "@/features/tasks/TaskDescription";
+import { TaskStatusBar } from "@/features/tasks/TaskStatusBar";
 import type { Task, TaskPriority, TaskStatus } from "@/features/tasks/taskTypes";
 import type { ProjectSummary } from "@/stores/projectStore";
 import type { UpdateTaskDraft } from "@/stores/taskStore";
@@ -100,6 +109,13 @@ export function TaskFormView({
         </div>
 
         <div className="space-y-5">
+          <div className="max-w-xl">
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Status</span>
+            <div className="mt-1">
+              <TaskStatusBar value={status} onChange={setStatus} />
+            </div>
+          </div>
+
           <label className="block">
             <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Title</span>
             <input
@@ -109,35 +125,53 @@ export function TaskFormView({
             />
           </label>
 
-          <label className="block">
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Description
-            </span>
-            <textarea
-              className="mt-1 min-h-56 w-full resize-y rounded-md border border-zinc-300 bg-white px-3 py-3 text-sm leading-6 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="Add task notes, context, or next steps"
-              value={description}
-            />
-          </label>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <label className="block">
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Description
+              </span>
+              <textarea
+                className="mt-1 min-h-56 w-full resize-y rounded-md border border-zinc-300 bg-white px-3 py-3 text-sm leading-6 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Add task notes, context, or next steps"
+                value={description}
+              />
+            </label>
+
+            <div>
+              <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Preview</p>
+              <div className="mt-1 min-h-56 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 dark:border-zinc-800 dark:bg-zinc-950">
+                {description.trim() ? (
+                  <TaskDescription markdown={description} />
+                ) : (
+                  <p className="text-sm text-zinc-500 dark:text-zinc-500">
+                    No description yet.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 border-t border-zinc-200 pt-5 sm:grid-cols-2 lg:grid-cols-4 dark:border-zinc-800">
           <label className="block">
             <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Project</span>
-            <select
-              className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
-              onChange={(event) => setProjectId(event.target.value)}
-              value={projectId}
-            >
-              {projects
-                .filter((project) => !project.isArchived)
-                .map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-            </select>
+            <div className="mt-1">
+              <Select onValueChange={setProjectId} value={projectId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects
+                    .filter((project) => !project.isArchived)
+                    .map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
           </label>
 
           <label className="block">
@@ -149,29 +183,20 @@ export function TaskFormView({
 
           <label className="block">
             <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Priority</span>
-            <select
-              className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
-              onChange={(event) => setPriority(event.target.value as TaskPriority)}
-              value={priority}
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
+            <div className="mt-1">
+              <Select onValueChange={(value) => setPriority(value as TaskPriority)} value={priority}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </label>
 
-          <label className="block">
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Status</span>
-            <select
-              className="mt-1 h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-blue-950"
-              onChange={(event) => setStatus(event.target.value as TaskStatus)}
-              value={status}
-            >
-              <option value="todo">Todo</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
-          </label>
         </div>
       </form>
     </section>

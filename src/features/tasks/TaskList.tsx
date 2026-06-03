@@ -2,6 +2,7 @@ import { CalendarDays, Check, Flag, GripVertical, Trash2 } from "lucide-react";
 
 import { EmptyState } from "@/components/EmptyState";
 import type { ProjectSummary } from "@/stores/projectStore";
+import { TaskDescription } from "@/features/tasks/TaskDescription";
 import type { Task } from "@/features/tasks/taskTypes";
 
 type TaskListProps = {
@@ -115,9 +116,7 @@ export function TaskList({
               ) : null}
             </div>
             {task.description ? (
-              <p className="mt-1 truncate text-sm text-zinc-600 dark:text-zinc-400">
-                {task.description}
-              </p>
+              <TaskDescription className="mt-1" markdown={task.description} variant="compact" />
             ) : null}
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
               {task.dueDate ? (

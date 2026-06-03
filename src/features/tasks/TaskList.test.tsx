@@ -60,6 +60,77 @@ describe("TaskList", () => {
     assert.match(markup, /High/);
     assert.match(markup, /Desktop App/);
   });
+
+  it("renders task descriptions as markdown", () => {
+    const markup = renderToStaticMarkup(
+      <TaskList
+        onDeleteTask={() => undefined}
+        onReorderTask={() => undefined}
+        onSelectTask={() => undefined}
+        onToggleTask={() => undefined}
+        projects={projects}
+        selectedTaskId={null}
+        tasks={[
+          makeTask("task-markdown", {
+            description: "**Confirm** `bundle` targets",
+            title: "Review Linux packaging"
+          })
+        ]}
+      />
+    );
+
+    assert.match(markup, /<strong/);
+    assert.match(markup, /Confirm/);
+    assert.match(markup, /<code/);
+    assert.match(markup, /bundle/);
+  });
+
+  it("preserves line breaks in task descriptions", () => {
+    const markup = renderToStaticMarkup(
+      <TaskList
+        onDeleteTask={() => undefined}
+        onReorderTask={() => undefined}
+        onSelectTask={() => undefined}
+        onToggleTask={() => undefined}
+        projects={projects}
+        selectedTaskId={null}
+        tasks={[
+          makeTask("task-line-breaks", {
+            description: "First line\nSecond line",
+            title: "Review Linux packaging"
+          })
+        ]}
+      />
+    );
+
+    assert.match(markup, /First line/);
+    assert.match(markup, /<br/);
+    assert.match(markup, /Second line/);
+  });
+
+  it("renders bullet lists in task descriptions", () => {
+    const markup = renderToStaticMarkup(
+      <TaskList
+        onDeleteTask={() => undefined}
+        onReorderTask={() => undefined}
+        onSelectTask={() => undefined}
+        onToggleTask={() => undefined}
+        projects={projects}
+        selectedTaskId={null}
+        tasks={[
+          makeTask("task-bullets", {
+            description: "- First item\n- Second item",
+            title: "Review Linux packaging"
+          })
+        ]}
+      />
+    );
+
+    assert.match(markup, /<ul/);
+    assert.match(markup, /<li/);
+    assert.match(markup, /First item/);
+    assert.match(markup, /Second item/);
+  });
 });
 
 function makeTask(id: string, overrides: Partial<Task> = {}): Task {
