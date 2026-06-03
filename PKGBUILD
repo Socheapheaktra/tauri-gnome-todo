@@ -1,4 +1,4 @@
-pkgname=yeeahnis-todo
+pkgname=GNOME.Tauri.TODO
 pkgver=1.0.1
 pkgrel=1
 pkgdesc="GNOME-inspired desktop task manager"
