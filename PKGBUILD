@@ -1,5 +1,5 @@
 pkgname=GNOME.Tauri.TODO
-pkgver=1.0.1
+pkgver=1.1.0
 pkgrel=1
 pkgdesc="GNOME-inspired desktop task manager"
 arch=('x86_64')
